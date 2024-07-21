@@ -3,6 +3,7 @@ from typing import Optional
 
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
+from icecream import ic
 from jose import JWTError
 from jose import jwt
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -46,12 +47,12 @@ async def get_current_user_from_token(
         )
         email: str = payload.get("email")
         if email is None:
-            raise credentials_exception
+            raise Exception('email is missing')
     except JWTError:
-        raise credentials_exception
+        raise Exception('cannot decode token')
     user = await _get_user_by_email_for_auth(email=email, session=db)
     if user is None:
-        raise credentials_exception
+        raise Exception('user is missing')
     return UserDTO.model_validate(user)
 
 
@@ -62,7 +63,7 @@ def create_pair_of_tokens(user: UserDTO) -> (str, str):
     if not user:
         raise Exception('User is None')
     try:
-        refresh_token_expires = timedelta(minutes=settings.AUTH_REFRESH_TOKEN_EXPIRE_WEEKS)
+        refresh_token_expires = timedelta(minutes=settings.AUTH_REFRESH_TOKEN_EXPIRE_MINUTES)
         refresh_token = create_access_token(
             data={
                 "user_id": user.user_id,
@@ -79,11 +80,9 @@ def create_pair_of_tokens(user: UserDTO) -> (str, str):
         access_token = create_access_token(
             data={
                 "user_id": user.user_id,
-                "name": user.name,
-                "surname": user.surname,
                 "email": user.email,
                 "role": user.role,
-                "refresh_expires": refresh_token_expires,
+                "refresh_expires": refresh_token_expires.total_seconds(),
             },
 
             expires_delta=access_token_expires,
@@ -95,31 +94,27 @@ def create_pair_of_tokens(user: UserDTO) -> (str, str):
 
 
 async def check_refresh_token_and_get_user(
-        token: str, db: AsyncSession = Depends(get_async_db)
+        token: str, db: AsyncSession,
 ) -> UserDTO:
+    payload = jwt.decode(
+        token, settings.AUTH_SECRET_KEY, algorithms=[settings.AUTH_ALGORITHM]
+    )
+    user_id: int = payload.get("user_id")
+    if user_id is None:
+        raise user_is_none
+    user_dal = UserDAL(db)
+    user = await user_dal.get_user_by_id(user_id=user_id)
+    if not user:
+        raise user_is_none
 
-    try:
-        payload = jwt.decode(
-            token, settings.AUTH_SECRET_KEY, algorithms=[settings.AUTH_ALGORITHM]
-        )
-        user_id: int = payload.get("user_id")
-        if user_id is None:
-            raise user_is_none
-        user_dal = UserDAL(db)
-        user = await user_dal.get_user_by_id(user_id=user_id)
-        if not user:
-            raise user_is_none
-
-        return user
-
-    except JWTError:
-        raise credentials_exception
+    return user
 
 
 async def get_new_tokens_for_user_by_refresh_token(
-        token: str
+        token: str,
+        db: AsyncSession,
 ):
-    user = await check_refresh_token_and_get_user(token)
+    user = await check_refresh_token_and_get_user(token, db)
     refresh_token, access_token = create_pair_of_tokens(user)
     return refresh_token, access_token
 

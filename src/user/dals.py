@@ -7,8 +7,8 @@ from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import User
-from .schemas import UserRole
 from .schemas import UserDTO
+from .schemas import UserRole
 
 
 class AbstractUserDAL(metaclass=ABCMeta):
@@ -18,7 +18,13 @@ class AbstractUserDAL(metaclass=ABCMeta):
 
     @abstractmethod
     def create_user(
-            self, username, name, surname, email, hashed_password, roles
+            self,
+            username,
+            # name,
+            # surname,
+            email,
+            hashed_password,
+            roles,
     ) -> UserDTO:
         pass
 
@@ -48,16 +54,16 @@ class SQLAlchemyUserDAL(AbstractUserDAL):
     async def create_user(
             self,
             username: str,
-            name: str,
-            surname: str,
+            # name: str,
+            # surname: str,
             email: str,
             hashed_password: str,
             role: UserRole,
     ) -> UserDTO:
         new_user = User(
             username=username,
-            name=name,
-            surname=surname,
+            # name=name,
+            # surname=surname,
             email=email,
             hashed_password=hashed_password,
             role=role,

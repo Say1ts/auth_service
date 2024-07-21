@@ -7,7 +7,7 @@ from jose import jwt
 import settings
 
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -22,9 +22,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None):
-    # TODO: Создать таблицу для хранения рефреш токенов пользователей
-    #  и его хранить в access token
+def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta

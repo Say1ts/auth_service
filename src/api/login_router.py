@@ -10,6 +10,7 @@ from auth.services import authenticate_user
 from auth.services import get_new_tokens_for_user_by_refresh_token
 from auth.services import create_pair_of_tokens
 from auth.schemas import Token
+from auth.schemas import RefreshToken
 from session import get_async_db
 
 login_router = APIRouter()
@@ -28,7 +29,8 @@ async def login_for_access_and_refresh_token(
 
 @login_router.post("/refresh", response_model=Token)
 async def login_for_access_token(
-        refresh_token,
+        data: RefreshToken,
+        db: AsyncSession = Depends(get_async_db),
 ):
-    new_refresh_token, access_token = get_new_tokens_for_user_by_refresh_token(refresh_token)
+    new_refresh_token, access_token = await get_new_tokens_for_user_by_refresh_token(data.refresh_token, db)
     return {"access_token": access_token, "token_type": "bearer", "refresh_token": new_refresh_token}

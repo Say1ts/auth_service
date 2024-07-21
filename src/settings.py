@@ -10,7 +10,7 @@ APP_PORT = env.int("APP_PORT", default=40610)
 AUTH_SECRET_KEY: str = env.str("AUTH_SECRET_KEY", default="secret_key")
 AUTH_ALGORITHM: str = env.str("AUTH_ALGORITHM", default="HS256")
 AUTH_ACCESS_TOKEN_EXPIRE_MINUTES: int = env.int("ACCESS_TOKEN_EXPIRE_MINUTES", default=30)
-AUTH_REFRESH_TOKEN_EXPIRE_WEEKS: int = env.int("REFRESH_TOKEN_EXPIRE_WEEKS", default=4)
+AUTH_REFRESH_TOKEN_EXPIRE_MINUTES: int = env.int("REFRESH_TOKEN_EXPIRE_MINUTES", default=4 * 7 * 24 * 60)
 
 # test envs
 # TEST_DATABASE_URL = env.str(

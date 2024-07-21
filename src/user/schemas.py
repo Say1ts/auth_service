@@ -4,10 +4,8 @@ from typing import Optional
 
 from fastapi import HTTPException
 from pydantic import BaseModel
-from pydantic import ConfigDict
 from pydantic import EmailStr
-from pydantic import constr
-from pydantic import validator
+from pydantic import field_validator
 
 LETTER_MATCH_PATTERN = re.compile(r"^[а-яА-Яa-zA-Z\-]+$")
 
@@ -17,23 +15,11 @@ class TunedModel(BaseModel):
         from_attributes = True
 
 
-class ShowUser(TunedModel):
-    user_id: int
-    username: str
-    name: str
-    surname: str
-    email: EmailStr
-    is_active: bool
+class NameMixture(BaseModel):
+    name: Optional[str]
+    surname: Optional[str]
 
-
-class UserCreate(BaseModel):
-    username: str
-    name: str
-    surname: str
-    email: EmailStr
-    password: str
-
-    @validator("name")
+    @field_validator("name")
     def validate_name(cls, value):
         if not LETTER_MATCH_PATTERN.match(value):
             raise HTTPException(
@@ -41,13 +27,25 @@ class UserCreate(BaseModel):
             )
         return value
 
-    @validator("surname")
+    @field_validator("surname")
     def validate_surname(cls, value):
         if not LETTER_MATCH_PATTERN.match(value):
             raise HTTPException(
                 status_code=422, detail="Surname should contains only letters"
             )
         return value
+
+
+class ShowUser(TunedModel):
+    user_id: int
+    username: str
+    email: EmailStr
+
+
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
 
 
 class DeleteUserResponse(BaseModel):
@@ -59,35 +57,17 @@ class UpdatedUserResponse(BaseModel):
 
 
 class UpdateUserRequest(BaseModel):
-    name: Optional[constr(min_length=1)]
-    surname: Optional[constr(min_length=1)]
     email: Optional[EmailStr]
-
-    @validator("name")
-    def validate_name(cls, value):
-        if not LETTER_MATCH_PATTERN.match(value):
-            raise HTTPException(
-                status_code=422, detail="Name should contains only letters"
-            )
-        return value
-
-    @validator("surname")
-    def validate_surname(cls, value):
-        if not LETTER_MATCH_PATTERN.match(value):
-            raise HTTPException(
-                status_code=422, detail="Surname should contains only letters"
-            )
-        return value
 
 
 class UserDTO(TunedModel):
     user_id: int
     username: str
-    name: str
-    surname: str
     email: EmailStr
     is_active: bool
     role: int
+
+    hashed_password: str
 
     def is_superadmin(self) -> bool:
         return self.role == UserRole.ROLE_SUPERADMIN
