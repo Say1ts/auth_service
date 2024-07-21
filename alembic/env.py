@@ -1,18 +1,17 @@
+import os
 
 from dotenv import load_dotenv
-load_dotenv()
-
 from logging.config import fileConfig
-
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-from auth import Base
 
-import settings
-database_url = "postgresql://postgres:postgres@localhost:5432/postgres"
+from src.user.models import Base
+
+load_dotenv()
+database_url = os.getenv("DATABASE_URL")
 
 config = context.config
 

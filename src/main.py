@@ -26,8 +26,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# app.include_router(user_router, prefix="/user", tags=["user"])
-app.include_router(login_router, prefix="/login", tags=["login"])
+app.include_router(user_router, prefix="/user", tags=["user"])
+app.include_router(login_router, prefix="/auth", tags=["auth"])
 
 
 # Exception Handlers
@@ -46,4 +46,8 @@ async def internal_exception_handler(request: Request, exc: Exception):
 
 if __name__ == "__main__":
     # run app on the host and port
-    uvicorn.run(app, host="0.0.0.0", port=settings.AUTH_APP_PORT)
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=settings.APP_PORT
+    )

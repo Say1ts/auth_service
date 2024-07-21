@@ -1,8 +1,22 @@
 # What is it?
-This project is a template of FastAPI project with pre-configurations:
-- sqlalchemy, alembic
-- poetry
-- structure of files
-- fastapi main.py and modules
-- dockerfile
+- The project provide Auth services and User services.
+- Authorization via JWT
 
+
+
+You can
+
+- [ ] Get refresh and access tokens via email and password
+- [ ] Refresh tokens
+- [ ] 
+
+
+- [ ] Create new user 
+  - [ ] with email confirmation 
+- [ ] 
+- [ ] 
+
+
+
+
+- Pydantic as DTO

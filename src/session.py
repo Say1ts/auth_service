@@ -6,22 +6,21 @@ from sqlalchemy.orm import sessionmaker
 
 import settings
 
-# create async engine for interaction with database
 engine = create_async_engine(
-    settings.AUTH_DATABASE_URL,
+    settings.ASYNC_DATABASE_URL,
     future=True,
     echo=True,
     execution_options={"isolation_level": "AUTOCOMMIT"},
 )
 
-# create session for the interaction with database
-async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+async_session = sessionmaker(
+    engine,
+    expire_on_commit=False,
+    class_=AsyncSession
+)
 
 
-async def get_db() -> Generator:
+async def get_async_db() -> Generator:
     """Dependency for getting async session"""
-    try:
-        session: AsyncSession = async_session()
+    async with async_session() as session:
         yield session
-    finally:
-        await session.close()
