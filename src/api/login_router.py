@@ -35,7 +35,7 @@ async def login_for_access_and_refresh_token(
         )
     refresh_token, access_token = create_pair_of_tokens(user)
     response.set_cookie(key="access_token", value=f"Bearer {access_token}",
-                        httponly=True)  # Устанавливаем HttpOnly cookie
+                        httponly=True)
     response.set_cookie(key="refresh_token", value=f"Bearer {refresh_token}", httponly=True)
     return {"access_token": access_token, "token_type": "bearer", "refresh_token": refresh_token}
 
@@ -48,11 +48,12 @@ async def login_for_access_token(
 ):
     new_refresh_token, access_token = await get_new_tokens_for_user_by_refresh_token(data.refresh_token, db)
     response.set_cookie(key="access_token", value=f"Bearer {access_token}",
-                        httponly=True)  # Устанавливаем HttpOnly cookie
+                        httponly=True)
     response.set_cookie(key="refresh_token", value=f"Bearer {new_refresh_token}", httponly=True)
     return {"access_token": access_token, "token_type": "bearer", "refresh_token": new_refresh_token}
 
 
+# Example
 @login_router.get("/protected-route")
 async def protected_route(
         current_user: Annotated[UserDTO, Depends(get_current_user_from_token)],
