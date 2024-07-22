@@ -1,5 +1,5 @@
 from datetime import timedelta
-from typing import Optional
+from typing import Optional, Annotated
 
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
@@ -39,7 +39,8 @@ async def authenticate_user(
 
 
 async def get_current_user_from_token(
-        token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_async_db)
+        token: str = Annotated[str, Depends(oauth2_scheme)],
+        db: AsyncSession = Depends(get_async_db)
 ) -> UserDTO:
     try:
         payload = jwt.decode(
@@ -73,7 +74,7 @@ def create_pair_of_tokens(user: UserDTO) -> (str, str):
             expires_delta=refresh_token_expires,
         )
     except JWTError:
-        raise cannot_create_refresh_token
+        raise Exception('Cannot create refresh token')
 
     try:
         access_token_expires = timedelta(minutes=settings.AUTH_ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -88,7 +89,7 @@ def create_pair_of_tokens(user: UserDTO) -> (str, str):
             expires_delta=access_token_expires,
         )
     except JWTError:
-        raise cannot_create_access_token
+        raise Exception('Cannot create access token')
 
     return refresh_token, access_token
 

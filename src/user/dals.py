@@ -20,8 +20,6 @@ class AbstractUserDAL(metaclass=ABCMeta):
     def create_user(
             self,
             username,
-            # name,
-            # surname,
             email,
             hashed_password,
             roles,
@@ -54,16 +52,12 @@ class SQLAlchemyUserDAL(AbstractUserDAL):
     async def create_user(
             self,
             username: str,
-            # name: str,
-            # surname: str,
             email: str,
             hashed_password: str,
             role: UserRole,
     ) -> UserDTO:
         new_user = User(
             username=username,
-            # name=name,
-            # surname=surname,
             email=email,
             hashed_password=hashed_password,
             role=role,
@@ -93,6 +87,13 @@ class SQLAlchemyUserDAL(AbstractUserDAL):
 
     async def get_user_by_email(self, email: str) -> Optional[UserDTO]:
         query = select(User).where(User.email == email)
+        res = await self.db_session.execute(query)
+        user_row = res.fetchone()
+        if user_row is not None:
+            return UserDTO.model_validate(user_row[0])
+
+    async def get_user_by_username(self, username: str) -> Optional[UserDTO]:
+        query = select(User).where(User.username == username)
         res = await self.db_session.execute(query)
         user_row = res.fetchone()
         if user_row is not None:

@@ -15,8 +15,6 @@ async def _create_new_user(body: UserCreate, session) -> ShowUser:
         user_dal = UserDAL(session)
         user = await user_dal.create_user(
             username=body.username,
-            # name=body.name,
-            # surname=body.surname,
             email=body.email,
             hashed_password=Hasher.get_password_hash(body.password),
             role=UserRole.ROLE_USER,
@@ -24,8 +22,6 @@ async def _create_new_user(body: UserCreate, session) -> ShowUser:
         return ShowUser(
             username=user.username,
             user_id=user.user_id,
-            # name=user.name,
-            # surname=user.surname,
             email=user.email,
             is_active=user.is_active,
         )
@@ -68,10 +64,8 @@ def has_permissions_to_effect_the_target(target_user: UserDTO, acting_user: User
         )
     if target_user.user_id == acting_user.user_id:
         return False
-    # check admin role
     if not acting_user.is_superadmin or not acting_user.is_admin:
         return False
-    # check admin deactivate admin attempt
     if target_user.is_admin and acting_user.is_admin:
         return False
     return True
